@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
-    <title>My Vinyls</title>
+    <title>Vinyl Collectie</title>
     <link rel="icon" type="image/jpeg" href="favicon.jpeg" />
     <link rel="apple-touch-icon" href="favicon.jpeg" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -447,6 +447,7 @@
             <div class="row">
                 <input id="searchText" placeholder="Zoek in collectie..." />
                 <button id="btnSearchDb" class="primary">Zoek</button>
+                <button id="btnSort" class="ghost">⇅ Sorteren</button>
             </div>
 
             <div id="dbOut" style="margin-top:10px;"></div>
@@ -491,6 +492,27 @@
         </div>
     </div>
 
+    <!-- Sort Overlay -->
+    <div id="sortOverlay" class="overlay">
+        <div class="overlay-content" style="max-width: 400px;">
+            <div class="overlay-header">
+                <h2>Hoe wil je sorteren?</h2>
+                <button class="overlay-close" onclick="closeSortOverlay()">×</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+                <button id="sortByArtist" class="primary" style="padding: 16px; font-size: 18px;">
+                    🎤 Sorteer op Artiest
+                </button>
+                <button id="sortByTitle" class="primary" style="padding: 16px; font-size: 18px;">
+                    💿 Sorteer op Titel
+                </button>
+                <button onclick="closeSortOverlay()" class="ghost" style="padding: 16px; margin-top: 8px;">
+                    Annuleer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = "https://zdqmbktlincgutbitlur.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkcW1ia3RsaW5jZ3V0Yml0bHVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NTgyNzIsImV4cCI6MjA4NTUzNDI3Mn0.fO40u52GuQvNnsORfUGC0Ure5xhWmpIjiAVu4_1-v9o";
@@ -530,8 +552,13 @@
         const deleteOverlay = document.getElementById('deleteOverlay');
         const deleteOverlayContent = document.getElementById('deleteOverlayContent');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const sortOverlay = document.getElementById('sortOverlay');
+        const btnSort = document.getElementById('btnSort');
+        const sortByArtist = document.getElementById('sortByArtist');
+        const sortByTitle = document.getElementById('sortByTitle');
 
         let recordToDelete = null;
+        let currentCollectionData = null; // Store current collection data for sorting
 
         function esc(s) {
             return String(s ?? "").replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]));
@@ -564,6 +591,14 @@
         function closeDeleteOverlay() {
             deleteOverlay.classList.remove('active');
             recordToDelete = null;
+        }
+
+        function openSortOverlay() {
+            sortOverlay.classList.add('active');
+        }
+
+        function closeSortOverlay() {
+            sortOverlay.classList.remove('active');
         }
 
         function showSearchResults(results) {
@@ -965,25 +1000,73 @@
 
                 if (!data || !data.length) {
                     setDb(`<div class="muted">Nog geen platen in collectie</div>`);
+                    currentCollectionData = null;
                     return;
                 }
 
-                setDb(data.map(r => `
-                    <div class="listItem">
-                        ${r.cover_image ? `<img class="cover" src="${esc(r.cover_image)}" alt="cover" />` : `<div class="cover"></div>`}
-                        <div class="listItem-info" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
-                            <div><b>${esc(r.artist || "")}</b> — ${esc(r.title || "")}</div>
-                            <div class="small">${r.year ? esc(r.year) : ""}${r.label ? " • " + esc(r.label) : ""}${r.barcode ? " • " + esc(r.barcode) : ""}</div>
-                        </div>
-                        <div class="listItem-actions">
-                            <button class="ghost" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>👁️ Bekijk</button>
-                            <button class="danger" data-delete='${JSON.stringify(r).replace(/'/g, "&apos;")}'>🗑️ Verwijder</button>
-                        </div>
-                    </div>
-                `).join(""));
+                currentCollectionData = data;
+                renderCollection(data);
             } catch (e) {
                 setDb(`<div class="bad">Fout bij laden collectie</div>`);
+                currentCollectionData = null;
             }
+        }
+
+        function renderCollection(data) {
+            if (!data || !data.length) {
+                setDb(`<div class="muted">Nog geen platen in collectie</div>`);
+                return;
+            }
+
+            setDb(data.map(r => `
+                <div class="listItem">
+                    ${r.cover_image ? `<img class="cover" src="${esc(r.cover_image)}" alt="cover" />` : `<div class="cover"></div>`}
+                    <div class="listItem-info" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
+                        <div><b>${esc(r.artist || "")}</b> — ${esc(r.title || "")}</div>
+                        <div class="small">${r.year ? esc(r.year) : ""}${r.label ? " • " + esc(r.label) : ""}${r.barcode ? " • " + esc(r.barcode) : ""}</div>
+                    </div>
+                    <div class="listItem-actions">
+                        <button class="ghost" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>Inspecteer</button>
+                        <button class="danger" data-delete='${JSON.stringify(r).replace(/'/g, "&apos;")}'>🗑️ Verwijder</button>
+                    </div>
+                </div>
+            `).join(""));
+        }
+
+        function sortByArtistFunc() {
+            if (!currentCollectionData) return;
+            
+            const sorted = [...currentCollectionData].sort((a, b) => {
+                const artistA = (a.artist || "").toLowerCase();
+                const artistB = (b.artist || "").toLowerCase();
+                
+                if (artistA !== artistB) {
+                    return artistA.localeCompare(artistB);
+                }
+                
+                // If same artist, sort by title
+                const titleA = (a.title || "").toLowerCase();
+                const titleB = (b.title || "").toLowerCase();
+                return titleA.localeCompare(titleB);
+            });
+
+            renderCollection(sorted);
+            closeSortOverlay();
+            setStatus(`<div class="ok">✓ Gesorteerd op artiest</div>`);
+        }
+
+        function sortByTitleFunc() {
+            if (!currentCollectionData) return;
+            
+            const sorted = [...currentCollectionData].sort((a, b) => {
+                const titleA = (a.title || "").toLowerCase();
+                const titleB = (b.title || "").toLowerCase();
+                return titleA.localeCompare(titleB);
+            });
+
+            renderCollection(sorted);
+            closeSortOverlay();
+            setStatus(`<div class="ok">✓ Gesorteerd op titel</div>`);
         }
 
         async function searchDb() {
@@ -1003,24 +1086,15 @@
 
                 if (!data || !data.length) {
                     setDb(`<div class="warn">Geen resultaten voor "${esc(q)}"</div>`);
+                    currentCollectionData = null;
                     return;
                 }
 
-                setDb(data.map(r => `
-                    <div class="listItem">
-                        ${r.cover_image ? `<img class="cover" src="${esc(r.cover_image)}" alt="cover" />` : `<div class="cover"></div>`}
-                        <div class="listItem-info" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>
-                            <div><b>${esc(r.artist || "")}</b> — ${esc(r.title || "")}</div>
-                            <div class="small">${r.year ? esc(r.year) : ""}${r.label ? " • " + esc(r.label) : ""}${r.barcode ? " • " + esc(r.barcode) : ""}</div>
-                        </div>
-                        <div class="listItem-actions">
-                            <button class="ghost" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>👁️ Bekijk</button>
-                            <button class="danger" data-delete='${JSON.stringify(r).replace(/'/g, "&apos;")}'>🗑️ Verwijder</button>
-                        </div>
-                    </div>
-                `).join(""));
+                currentCollectionData = data;
+                renderCollection(data);
             } catch (e) {
                 setDb(`<div class="bad">Zoekfout</div>`);
+                currentCollectionData = null;
             }
         }
 
@@ -1066,8 +1140,12 @@
         btnSearchDb.addEventListener('click', searchDb);
         searchTextEl.addEventListener('keydown', (e) => { if (e.key === "Enter") searchDb(); });
 
+        btnSort.addEventListener('click', openSortOverlay);
+        sortByArtist.addEventListener('click', sortByArtistFunc);
+        sortByTitle.addEventListener('click', sortByTitleFunc);
+
         // Close overlays on background click
-        [searchOverlay, inspectOverlay, deleteOverlay].forEach(overlay => {
+        [searchOverlay, inspectOverlay, deleteOverlay, sortOverlay].forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
                     overlay.classList.remove('active');
