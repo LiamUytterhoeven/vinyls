@@ -341,13 +341,17 @@
         @media (max-width: 680px) {
             .listItem {
                 grid-template-columns: 84px 1fr;
-                padding: 12px 14px 12px 12px;
+                padding: 12px 8px 12px 12px;
             }
             
             .listItem-actions {
                 grid-column: 2;
                 flex-direction: row;
                 margin-top: 8px;
+            }
+            
+            .listItem-actions button {
+                padding: 8px 10px;
             }
         }
     </style>
@@ -978,14 +982,15 @@
             try {
                 await insertRecord(payload);
                 setAdd(`<span class="ok">✓ Toegevoegd</span>`);
-                setStatus(`<div class="ok">✓ Toegevoegd aan collectie</div>`);
 
                 barcodeEl.value = "";
                 nameSearchEl.value = "";
                 setNameSearchStatus("");
+                setStatus("");
 
                 clearConfirm();
                 await loadCollection();
+                setCollectionStatus(`<div class="ok">✓ Toegevoegd aan collectie</div>`);
             } catch (e) {
                 setAdd(`<span class="bad">Fout: ${esc(e.message || e)}</span>`);
             }
@@ -993,6 +998,7 @@
 
         async function loadCollection() {
             setDb(`<div class="muted">Laden...</div>`);
+            setCollectionStatus("");
             try {
                 const { data, error } = await sb
                     .from('records')
@@ -1075,7 +1081,12 @@
 
         async function searchDb() {
             const q = searchTextEl.value.trim();
-            if (!q) { await loadCollection(); return; }
+            setCollectionStatus("");
+            
+            if (!q) { 
+                await loadCollection(); 
+                return; 
+            }
 
             setDb(`<div class="muted">Zoeken...</div>`);
             try {
@@ -1096,6 +1107,7 @@
 
                 currentCollectionData = data;
                 renderCollection(data);
+                setCollectionStatus(`<div class="ok">✓ ${data.length} resultaten gevonden</div>`);
             } catch (e) {
                 setDb(`<div class="bad">Zoekfout</div>`);
                 currentCollectionData = null;
