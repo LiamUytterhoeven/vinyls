@@ -4,10 +4,10 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
-    <title>Vinyl Collectie</title>
+    <title>My Vinyls</title>
     <link rel="icon" type="image/jpeg" href="favicon.jpeg" />
     <link rel="apple-touch-icon" href="favicon.jpeg" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <style>
@@ -341,6 +341,7 @@
         @media (max-width: 680px) {
             .listItem {
                 grid-template-columns: 84px 1fr;
+                padding-right: 8px;
             }
             
             .listItem-actions {
@@ -501,10 +502,10 @@
             </div>
             <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
                 <button id="sortByArtist" class="primary" style="padding: 16px; font-size: 18px;">
-                    🎤 Sorteer op Artiest
+                    Sorteer op Artiest
                 </button>
                 <button id="sortByTitle" class="primary" style="padding: 16px; font-size: 18px;">
-                    💿 Sorteer op Titel
+                    Sorteer op Titel
                 </button>
                 <button onclick="closeSortOverlay()" class="ghost" style="padding: 16px; margin-top: 8px;">
                     Annuleer
@@ -1034,7 +1035,13 @@
         }
 
         function sortByArtistFunc() {
-            if (!currentCollectionData) return;
+            console.log('sortByArtistFunc called');
+            console.log('currentCollectionData:', currentCollectionData);
+            
+            if (!currentCollectionData) {
+                console.log('No collection data available');
+                return;
+            }
             
             const sorted = [...currentCollectionData].sort((a, b) => {
                 const artistA = (a.artist || "").toLowerCase();
@@ -1050,13 +1057,20 @@
                 return titleA.localeCompare(titleB);
             });
 
+            console.log('Sorted data:', sorted);
             renderCollection(sorted);
             closeSortOverlay();
             setStatus(`<div class="ok">✓ Gesorteerd op artiest</div>`);
         }
 
         function sortByTitleFunc() {
-            if (!currentCollectionData) return;
+            console.log('sortByTitleFunc called');
+            console.log('currentCollectionData:', currentCollectionData);
+            
+            if (!currentCollectionData) {
+                console.log('No collection data available');
+                return;
+            }
             
             const sorted = [...currentCollectionData].sort((a, b) => {
                 const titleA = (a.title || "").toLowerCase();
@@ -1064,6 +1078,7 @@
                 return titleA.localeCompare(titleB);
             });
 
+            console.log('Sorted data:', sorted);
             renderCollection(sorted);
             closeSortOverlay();
             setStatus(`<div class="ok">✓ Gesorteerd op titel</div>`);
