@@ -341,21 +341,29 @@
         @media (max-width: 680px) {
             .listItem {
                 grid-template-columns: 84px 1fr;
-                padding: 12px 3px 12px 12px;
+                grid-template-rows: auto auto;
+                padding: 12px;
             }
-    
-            .listItem-actions {
+            
+            .listItem-info {
                 grid-column: 2;
+                grid-row: 1;
+            }
+            
+            .listItem-actions {
+                grid-column: 1 / -1;
+                grid-row: 2;
                 flex-direction: row;
-                margin-top: 8px;
-                gap: 6px;  /* ← verklein dit ook (was 8px) */
+                margin-top: 12px;
+                gap: 8px;
+                justify-content: flex-end;
             }
-    
+            
             .listItem-actions button {
-                padding: 7px 6px;  /* ← verklein dit: was 8px 10px */
-                font-size: 13px;  /* ← optioneel: maak tekst iets kleiner */
+                padding: 8px 14px;
+                flex: 0 1 auto;
             }
-}
+        }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -567,7 +575,8 @@
         const sortByTitle = document.getElementById('sortByTitle');
 
         let recordToDelete = null;
-        let currentCollectionData = null; // Store current collection data for sorting
+        let currentCollectionData = null;
+        let currentSortOrder = 'date'; // Track current sort order
 
         function esc(s) {
             return String(s ?? "").replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]));
@@ -708,13 +717,11 @@
             if (!recordToDelete) return;
 
             try {
-                // Use id if available, otherwise fall back to composite key
                 let query = sb.from('records').delete();
                 
                 if (recordToDelete.id) {
                     query = query.eq('id', recordToDelete.id);
                 } else {
-                    // Fallback to composite key if id is not available
                     query = query
                         .eq('artist', recordToDelete.artist)
                         .eq('title', recordToDelete.title)
@@ -1013,10 +1020,12 @@
                 if (!data || !data.length) {
                     setDb(`<div class="muted">Nog geen platen in collectie</div>`);
                     currentCollectionData = null;
+                    currentSortOrder = 'date';
                     return;
                 }
 
                 currentCollectionData = data;
+                currentSortOrder = 'date';
                 renderCollection(data);
             } catch (e) {
                 setDb(`<div class="bad">Fout bij laden collectie</div>`);
@@ -1056,12 +1065,12 @@
                     return artistA.localeCompare(artistB);
                 }
                 
-                // If same artist, sort by title
                 const titleA = (a.title || "").toLowerCase();
                 const titleB = (b.title || "").toLowerCase();
                 return titleA.localeCompare(titleB);
             });
 
+            currentSortOrder = 'artist';
             renderCollection(sorted);
             closeSortOverlay();
             setCollectionStatus(`<div class="ok">✓ Gesorteerd op artiest</div>`);
@@ -1076,6 +1085,7 @@
                 return titleA.localeCompare(titleB);
             });
 
+            currentSortOrder = 'title';
             renderCollection(sorted);
             closeSortOverlay();
             setCollectionStatus(`<div class="ok">✓ Gesorteerd op titel</div>`);
@@ -1108,6 +1118,7 @@
                 }
 
                 currentCollectionData = data;
+                currentSortOrder = 'date';
                 renderCollection(data);
                 setCollectionStatus(`<div class="ok">✓ ${data.length} resultaten gevonden</div>`);
             } catch (e) {
