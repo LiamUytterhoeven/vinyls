@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
     <title>My Vinyls</title>
     <link rel="icon" type="image/jpeg" href="favicon.jpeg" />
+    <link rel="apple-touch-icon" href="favicon.jpeg" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <style>
         :root {
@@ -339,7 +342,7 @@
             .listItem {
                 grid-template-columns: 84px 1fr;
             }
-
+            
             .listItem-actions {
                 grid-column: 2;
                 flex-direction: row;
@@ -573,10 +576,10 @@
                 <div class="search-results-grid">
                     ${results.map((r, i) => `
                         <div class="search-result-item" data-result-index="${i}">
-                            ${r.cover_image ?
-                    `<img class="search-result-cover" src="${esc(r.cover_image)}" alt="cover" />` :
-                    `<div class="search-result-cover"></div>`
-                }
+                            ${r.cover_image ? 
+                                `<img class="search-result-cover" src="${esc(r.cover_image)}" alt="cover" />` : 
+                                `<div class="search-result-cover"></div>`
+                            }
                             <div>
                                 <div style="font-weight: 600; margin-bottom: 6px;">${esc(r.title || "")}</div>
                                 <div class="small">
@@ -662,7 +665,7 @@
             try {
                 // Use id if available, otherwise fall back to composite key
                 let query = sb.from('records').delete();
-
+                
                 if (recordToDelete.id) {
                     query = query.eq('id', recordToDelete.id);
                 } else {
@@ -808,7 +811,7 @@
 
             discogsMeta.innerHTML = `<div>${esc(r.title || "")}${r.year ? " (" + esc(r.year) + ")" : ""}</div>`;
             window.__discogsSelected = r;
-
+            
             closeSearchOverlay();
         }
 
@@ -1027,8 +1030,8 @@
         btnCheck.addEventListener('click', onCheck);
 
         btnNameSearch.addEventListener('click', runNameSearch);
-        nameSearchEl.addEventListener('keydown', (e) => {
-            if (e.key === "Enter") runNameSearch();
+        nameSearchEl.addEventListener('keydown', (e) => { 
+            if (e.key === "Enter") runNameSearch(); 
         });
 
         searchOverlayContent.addEventListener('click', (e) => {
