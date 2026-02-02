@@ -341,7 +341,7 @@
         @media (max-width: 680px) {
             .listItem {
                 grid-template-columns: 84px 1fr;
-                padding-right: 8px;
+                padding: 12px 14px 12px 12px;
             }
             
             .listItem-actions {
@@ -451,6 +451,7 @@
                 <button id="btnSort" class="ghost">⇅ Sorteren</button>
             </div>
 
+            <div id="collectionStatus" style="margin-top:10px;"></div>
             <div id="dbOut" style="margin-top:10px;"></div>
         </div>
 
@@ -502,10 +503,10 @@
             </div>
             <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
                 <button id="sortByArtist" class="primary" style="padding: 16px; font-size: 18px;">
-                    Sorteer op Artiest
+                    🎤 Sorteer op Artiest
                 </button>
                 <button id="sortByTitle" class="primary" style="padding: 16px; font-size: 18px;">
-                    Sorteer op Titel
+                    💿 Sorteer op Titel
                 </button>
                 <button onclick="closeSortOverlay()" class="ghost" style="padding: 16px; margin-top: 8px;">
                     Annuleer
@@ -545,6 +546,7 @@
         const searchTextEl = document.getElementById('searchText');
         const btnSearchDb = document.getElementById('btnSearchDb');
         const dbOut = document.getElementById('dbOut');
+        const collectionStatus = document.getElementById('collectionStatus');
 
         const searchOverlay = document.getElementById('searchOverlay');
         const searchOverlayContent = document.getElementById('searchOverlayContent');
@@ -568,6 +570,7 @@
         function setDb(html) { dbOut.innerHTML = html; }
         function setAdd(html) { addOut.innerHTML = html; }
         function setNameSearchStatus(html) { nameSearchStatus.innerHTML = html; }
+        function setCollectionStatus(html) { collectionStatus.innerHTML = html; }
 
         function openSearchOverlay() {
             searchOverlay.classList.add('active');
@@ -718,7 +721,7 @@
 
                 closeDeleteOverlay();
                 await loadCollection();
-                setStatus(`<div class="ok">✓ Plaat verwijderd uit collectie</div>`);
+                setCollectionStatus(`<div class="ok">✓ Plaat verwijderd uit collectie</div>`);
             } catch (e) {
                 alert(`Fout bij verwijderen: ${e.message}`);
                 console.error('Delete error:', e);
@@ -1027,7 +1030,7 @@
                         <div class="small">${r.year ? esc(r.year) : ""}${r.label ? " • " + esc(r.label) : ""}${r.barcode ? " • " + esc(r.barcode) : ""}</div>
                     </div>
                     <div class="listItem-actions">
-                        <button class="ghost" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>Inspecteer</button>
+                        <button class="ghost" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>👁️ Bekijk</button>
                         <button class="danger" data-delete='${JSON.stringify(r).replace(/'/g, "&apos;")}'>🗑️ Verwijder</button>
                     </div>
                 </div>
@@ -1035,13 +1038,7 @@
         }
 
         function sortByArtistFunc() {
-            console.log('sortByArtistFunc called');
-            console.log('currentCollectionData:', currentCollectionData);
-            
-            if (!currentCollectionData) {
-                console.log('No collection data available');
-                return;
-            }
+            if (!currentCollectionData) return;
             
             const sorted = [...currentCollectionData].sort((a, b) => {
                 const artistA = (a.artist || "").toLowerCase();
@@ -1057,20 +1054,13 @@
                 return titleA.localeCompare(titleB);
             });
 
-            console.log('Sorted data:', sorted);
             renderCollection(sorted);
             closeSortOverlay();
-            setStatus(`<div class="ok">✓ Gesorteerd op artiest</div>`);
+            setCollectionStatus(`<div class="ok">✓ Gesorteerd op artiest</div>`);
         }
 
         function sortByTitleFunc() {
-            console.log('sortByTitleFunc called');
-            console.log('currentCollectionData:', currentCollectionData);
-            
-            if (!currentCollectionData) {
-                console.log('No collection data available');
-                return;
-            }
+            if (!currentCollectionData) return;
             
             const sorted = [...currentCollectionData].sort((a, b) => {
                 const titleA = (a.title || "").toLowerCase();
@@ -1078,10 +1068,9 @@
                 return titleA.localeCompare(titleB);
             });
 
-            console.log('Sorted data:', sorted);
             renderCollection(sorted);
             closeSortOverlay();
-            setStatus(`<div class="ok">✓ Gesorteerd op titel</div>`);
+            setCollectionStatus(`<div class="ok">✓ Gesorteerd op titel</div>`);
         }
 
         async function searchDb() {
