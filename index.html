@@ -351,7 +351,7 @@
             }
             
             .listItem-actions button {
-                padding: 8px 10px;
+                padding: 8px 5px;
             }
         }
     </style>
@@ -507,10 +507,10 @@
             </div>
             <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
                 <button id="sortByArtist" class="primary" style="padding: 16px; font-size: 18px;">
-                    🎤 Sorteer op Artiest
+                    Sorteer op Artiest
                 </button>
                 <button id="sortByTitle" class="primary" style="padding: 16px; font-size: 18px;">
-                    💿 Sorteer op Titel
+                    Sorteer op Titel
                 </button>
                 <button onclick="closeSortOverlay()" class="ghost" style="padding: 16px; margin-top: 8px;">
                     Annuleer
@@ -1036,7 +1036,7 @@
                         <div class="small">${r.year ? esc(r.year) : ""}${r.label ? " • " + esc(r.label) : ""}${r.barcode ? " • " + esc(r.barcode) : ""}</div>
                     </div>
                     <div class="listItem-actions">
-                        <button class="ghost" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>👁️ Bekijk</button>
+                        <button class="ghost" data-inspect='${JSON.stringify(r).replace(/'/g, "&apos;")}'>Inspecteer</button>
                         <button class="danger" data-delete='${JSON.stringify(r).replace(/'/g, "&apos;")}'>🗑️ Verwijder</button>
                     </div>
                 </div>
